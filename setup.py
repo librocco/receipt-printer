@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
@@ -8,7 +8,7 @@ setup(
     author="Code Myriad",
     author_email="codemyriad@example.com",
     description="Connects to a POS printer and print receipts from a CouchDB database",
-    packages=find_packages(),
+    packages=["librocco_receipt_printer"],
     install_requires=["couchdb"],
     entry_points={
         "console_scripts": [
