@@ -1,8 +1,8 @@
 import time
 
-from constants import VERSION
+from .constants import VERSION
 
-from print_job import PrintJob
+from .print_job import PrintJob
 
 
 class PrintQueue(object):
