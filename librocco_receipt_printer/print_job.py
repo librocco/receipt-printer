@@ -1,4 +1,13 @@
-from couchdb.mapping import Document, TextField
+from couchdb.mapping import (
+    Document,
+    TextField,
+    ListField,
+    DictField,
+    IntegerField,
+    FloatField,
+    LongField,
+    Mapping,
+)
 
 
 class PrintJob(Document):
@@ -14,5 +23,32 @@ class PrintJob(Document):
     TODO: Make this more elaborate, this is just a placeholder
     """
 
+    def __str__(self):
+        str = f"<PrintJob for '{self.printer_id}'\n"
+        str += f"  Items:\n"
+        for entry in self.items:
+            str += f"    isbn = '{entry['isbn']}'"
+            str += f" title = '{entry['title']}'"
+            str += f" quantity = {entry['quantity']}"
+            str += f" price = {entry['price']}\n"
+        str += f"\n  Total: {self.total}\n"
+        return str
+
+    # Job data
     printer_id = TextField()
-    content = TextField()
+    status = TextField()
+    error = TextField()
+
+    # Receipt data
+    items = ListField(
+        DictField(
+            Mapping.build(
+                isbn=TextField(),
+                title=TextField(),
+                quantity=IntegerField(),
+                price=FloatField(),
+            )
+        )
+    )
+    total = FloatField()
+    timestamp = LongField()
