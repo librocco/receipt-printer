@@ -5,7 +5,7 @@ from .constants import VERSION
 from .print_job import PrintJob
 
 
-class PrintQueue(object):
+class PrintQueue:
     def __init__(self, db, printer_id):
         self.db = db
         self.printer_id = printer_id
