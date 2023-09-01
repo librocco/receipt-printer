@@ -50,6 +50,10 @@ class PrintJob(Document):
         self.error = error
         self.store(db)
 
+    def print(self, printer):
+        """Print the print job to the printer."""
+        printer.print(self.__str__())
+
     # Job data
     printer_id = TextField()
     status = TextField()

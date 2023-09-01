@@ -9,7 +9,7 @@ setup(
     author_email="codemyriad@example.com",
     description="Connects to a POS printer and print receipts from a CouchDB database",
     packages=["librocco_receipt_printer"],
-    install_requires=["couchdb"],
+    install_requires=["couchdb", "python-escpos"],
     entry_points={
         "console_scripts": [
             "librocco-receipt-printer=librocco_receipt_printer.cli:main",

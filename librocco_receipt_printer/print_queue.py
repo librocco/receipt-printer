@@ -38,10 +38,10 @@ class PrintQueue:
         # We're sleeping for 2 secs to simulate the printing process
         # TODO: Remove this when we connect to the printer.
         time.sleep(2)
-        print(job)
+        job.print(self.printer)
 
         job.done(self.db)
-        print(f"Job {job.id} done")
+        print(f"Job {job.id} done\n")
 
     def listen(self):
         basepath = f"{VERSION}/print_queue/{self.printer_id}"
@@ -51,7 +51,9 @@ class PrintQueue:
         for change in self.stream_changes(selector=selector):
             yield PrintJob.load(self.db, change.get("id"))
 
-    def start(self):
+    def start(self, printer):
+        self.printer = printer
+
         # TODO: Have the printer signal that it's online and ready to receive jobs
 
         for job in self.listen():
