@@ -13,8 +13,7 @@ def main():
 
     print(f"Connecting to {COUCH_SERVER} and waiting for jobs")
     try:
-        for job in print_queue.listen():
-            print(job)
+        print_queue.start()
     except KeyboardInterrupt:
         print("Exiting")
 

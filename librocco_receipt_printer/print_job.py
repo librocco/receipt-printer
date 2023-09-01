@@ -34,6 +34,22 @@ class PrintJob(Document):
         str += f"\n  Total: {self.total}\n"
         return str
 
+    def processing(self, db):
+        """Set the status of the print job to 'PROCESSING' and store it in the database."""
+        self.status = "PROCESSING"
+        self.store(db)
+
+    def done(self, db):
+        """Set the status of the print job to 'DONE' and store it in the database."""
+        self.status = "DONE"
+        self.store(db)
+
+    def error(self, db, error):
+        """Set the status of the print job to 'ERROR' and store it in the database."""
+        self.status = "ERROR"
+        self.error = error
+        self.store(db)
+
     # Job data
     printer_id = TextField()
     status = TextField()
