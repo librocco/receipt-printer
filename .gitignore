@@ -9,6 +9,4 @@ build/
 # direnv environment files
 .direnv/
 
-# printer output
-prints/**
 
