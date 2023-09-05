@@ -35,9 +35,6 @@ class PrintQueue:
         job.processing(self.db)
 
         print(f"Printing job {job.id}...")
-        # We're sleeping for 2 secs to simulate the printing process
-        # TODO: Remove this when we connect to the printer.
-        time.sleep(2)
         job.print(self.printer)
 
         job.done(self.db)

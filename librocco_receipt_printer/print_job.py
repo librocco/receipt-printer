@@ -24,7 +24,10 @@ class PrintJob(Document):
     """
 
     def __str__(self):
-        str = f"<PrintJob for '{self.printer_id}'\n"
+        # Last segment of the id, e.g. 'print_queue/printer1/1' -> '1'
+        short_id = self.id.split("/")[-1]
+
+        str = f"Receipt '{short_id}':\n"
         str += f"  Items:\n"
         for entry in self.items:
             str += f"    isbn = '{entry['isbn']}'"
@@ -52,7 +55,7 @@ class PrintJob(Document):
 
     def print(self, printer):
         """Print the print job to the printer."""
-        printer.print(self.__str__())
+        printer.print(str(self))
 
     # Job data
     printer_id = TextField()
