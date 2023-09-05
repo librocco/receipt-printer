@@ -28,6 +28,13 @@ class PrintQueue:
             time.sleep(1)
 
     def process_job(self, job):
+        # If the print job document is deleted (which shouldn't happen, but still...),
+        # it would trigger an empty result on change query, which would cause an exception.
+        # We're checking for this edge case here.
+        if job is None:
+            return
+
+        # Account only for pending print jobs
         if job.status != "PENDING" or job.printer_id != self.printer_id:
             return
 
