@@ -13,6 +13,7 @@ setup(
     entry_points={
         "console_scripts": [
             "librocco-receipt-printer=librocco_receipt_printer.cli:main",
+            "librocco-print-test=librocco_receipt_printer.cli:dry_run",
         ],
     },
 )
