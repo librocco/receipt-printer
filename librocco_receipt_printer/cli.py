@@ -25,5 +25,22 @@ def main():
         print("Exiting")
 
 
+def dry_run():
+    """Dry run is used for `librocco-print-test` command. It prints a canned receipt
+    and is used to test the printer being connected and accessible.
+
+    TODO: This should most definitely be an actual printer, not a test file
+
+    TODO: When we proceed with the implementation (and formatting of receipts) we'd
+    probably want to store a dummy receipt and print it out (instead of just printing out the "Test receipt" string)
+    """
+
+    printer = DevPrinter(PRINT_OUTPUT_FILE)
+    printer.print("Test receipt\n")
+
+
 if __name__ == "__main__":
     main()
+
+if __name__ == "__dry_run__":
+    dry_run()
