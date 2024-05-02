@@ -12,6 +12,7 @@ setup(
     install_requires=[
         "fastapi",
         "uvicorn",
+        "click",
     ],
     entry_points={
         "console_scripts": [
