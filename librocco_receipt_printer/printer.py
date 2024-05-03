@@ -18,7 +18,7 @@ def get_printer(printer_url):
 
 
 def do_print(printer_url, receipt_data):
-    printer = Network(printer_url)
+    printer = get_printer(printer_url)
     total = 0
     discounted_total = 0
 
