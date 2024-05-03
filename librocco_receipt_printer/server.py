@@ -4,7 +4,9 @@ from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 import click
 import json
+import uvicorn
 from .printer import do_print
+from .printer import get_printer
 from .constants import OPTIONS
 
 app = FastAPI()
@@ -47,8 +49,8 @@ async def print_label(request: Request):
 @click.option("--printer-url", default=None, help="URL for the printer")
 @click.option("--port", default="8000", help="Port to run the server on", type=int)
 def main(port, printer_url):
-    import uvicorn
-
+    # Smoke test the printer
+    get_printer(printer_url)
     OPTIONS["PRINTER_URL"] = printer_url
     print(f"Starting server with printer url {printer_url}")
     uvicorn.run(app, host="0.0.0.0", port=port)

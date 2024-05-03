@@ -1,4 +1,20 @@
 from escpos.printer import Network
+from escpos.printer import Usb
+import re
+
+
+def get_printer(printer_url):
+    """printer_url might be:
+    * a numeric IP address (like "10.10.10.10")
+    * a string representing a USB device (like "0x04b8,0x0202")
+    """
+    # If the URL only contains digits and dots, it's an IP address
+    if all(char in "0123456789." for char in printer_url):
+        return Network(printer_url)
+    elif re.fullmatch(r"0x[0-9A-Fa-f]{4},0x[0-9A-Fa-f]{4}", printer_url) is not None:
+        vendor_id, product_id = map(lambda x: int(x, 16), printer_url.split(","))
+        return Usb(vendor_id, product_id)
+    raise RuntimeError(f"Invalid printer URL: {printer_url}")
 
 
 def do_print(printer_url, receipt_data):
