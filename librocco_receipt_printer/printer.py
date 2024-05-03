@@ -8,7 +8,7 @@ def do_print(printer_url, receipt_data):
 
     # Start bold text for the receipt header
     printer.set(align="center", bold=True)
-    printer.text("Receipt\n\n")
+    printer.text("Your local bookshop\n\n")
     printer.set(bold=False)
 
     for item in receipt_data["items"]:

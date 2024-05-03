@@ -34,11 +34,11 @@ async def print_label():
 async def print_label(request: Request):
     # Get the  book data from bookData POST var
     try:
-        recept_data = await request.json()
+        receipt_data = await request.json()
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=405, detail="Invalid JSON data: %s" % e)
 
-    do_print(printer_url=OPTIONS["PRINTER_URL"], recept_data=recept_data)
+    do_print(printer_url=OPTIONS["PRINTER_URL"], receipt_data=receipt_data)
 
     return {"status": "OK", "message": f"Receipt printed"}
 
@@ -50,6 +50,7 @@ def main(port, printer_url):
     import uvicorn
 
     OPTIONS["PRINTER_URL"] = printer_url
+    print(f"Starting server with printer url {printer_url}")
     uvicorn.run(app, host="0.0.0.0", port=port)
 
 
