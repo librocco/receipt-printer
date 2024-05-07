@@ -1,5 +1,6 @@
 from escpos.printer import Network
 from escpos.printer import Usb
+import click
 import re
 
 
@@ -55,13 +56,15 @@ def do_print(printer_url, receipt_data):
     printer.cut()
 
 
-def main():
+@click.command()
+@click.option("--printer-url", default=None, required=True, help="URL for the printer")
+def main(printer_url):
     """Edit the "URL" (It's an IP address) and run
     python -m librocco_receipt_printer.printer
 
     to test this with a network printer
     """
-    do_print("100.98.209.46", TEST_DATA)
+    do_print(printer_url, TEST_DATA)
 
 
 TEST_DATA = {
