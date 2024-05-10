@@ -11,7 +11,7 @@ def get_printer(printer_url):
     """
     # If the URL only contains digits and dots, it's an IP address
     if all(char in "0123456789." for char in printer_url):
-        return Network(printer_url)
+        return Network(printer_url, port=9100)
     elif re.fullmatch(r"0x[0-9A-Fa-f]{4},0x[0-9A-Fa-f]{4}", printer_url) is not None:
         vendor_id, product_id = map(lambda x: int(x, 16), printer_url.split(","))
         return Usb(vendor_id, product_id)
@@ -24,8 +24,10 @@ def do_print(printer_url, receipt_data):
     discounted_total = 0
 
     # Start bold text for the receipt header
-    printer.set(align="center", bold=True)
-    printer.text("Your local bookshop\n\n")
+    printer.set(align="center", font="a", width=2, height=2, bold=True)
+    printer.text("Il Libraio\n")
+    printer.text("via XX Settembre, 5\n")
+    printer.text("12100 Cuneo\n\n\n")
     printer.set(bold=False)
 
     for item in receipt_data["items"]:
@@ -35,22 +37,28 @@ def do_print(printer_url, receipt_data):
 
         printer.set(align="left", bold=False)
         printer.text(f"{item['title']}\n")
-        printer.text(f"Quantity: {item['quantity']}\n")
+        if item["quantity"] != 1:
+            printer.text(f"Quantità: {item['quantity']}\n")
 
         # Enable bold for price display
         printer.set(align="right", bold=True)
-        printer.text(f"Price: {item['price']:.2f} €\n")
-        printer.text(f"Discount: {discount}%\n")
-        printer.text(f"Discounted Price: {discounted_price:.2f} €\n\n")
+        printer.text(f"Prezzo: {item['price']:.2f} €\n")
+        printer.text(f"Sconto: {discount}%\n")
+        printer.text(f"Prezzo scontato: {discounted_price:.2f} €\n\n")
         printer.set(align="left", bold=False)
 
         total += original_price
         discounted_total += discounted_price
 
-    # Display totals in bold
+    total_discount = total - discounted_total
+
     printer.set(bold=True)
-    printer.text(f"Subtotal: {total:.2f} €\n")
-    printer.text(f"Total after Discounts: {discounted_total:.2f} €\n")
+    if total_discount != 0:
+        printer.text(f"Subtotale:\t{total:.2f} €\n")
+        printer.text(f"Sconto:\t{total_discount:.2f} €\n")
+        printer.text(f"Totale scontato:\t{discounted_total:.2f} €\n")
+    else:
+        printer.text(f"Totale:\t{discounted_total:.2f} €\n")
     printer.set(bold=False)
 
     printer.cut()
