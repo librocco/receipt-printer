@@ -50,7 +50,8 @@ async def print_label(request: Request):
 @click.option("--port", default="8000", help="Port to run the server on", type=int)
 def main(port, printer_url):
     # Smoke test the printer
-    get_printer(printer_url)
+    with get_printer(printer_url) as printer:
+        pass
     OPTIONS["PRINTER_URL"] = printer_url
     print(f"Starting server with printer url {printer_url}")
     uvicorn.run(app, host="0.0.0.0", port=port)

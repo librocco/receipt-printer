@@ -1,67 +1,88 @@
+from contextlib import contextmanager
 from escpos.printer import Network
 from escpos.printer import Usb
+import usb.core
+import usb.util
 import click
 import re
 
 
+@contextmanager
 def get_printer(printer_url):
     """printer_url might be:
     * a numeric IP address (like "10.10.10.10")
     * a string representing a USB device (like "0x04b8,0x0202")
     """
-    # If the URL only contains digits and dots, it's an IP address
-    if all(char in "0123456789." for char in printer_url):
-        return Network(printer_url, port=9100)
-    elif re.fullmatch(r"0x[0-9A-Fa-f]{4},0x[0-9A-Fa-f]{4}", printer_url) is not None:
-        vendor_id, product_id = map(lambda x: int(x, 16), printer_url.split(","))
-        return Usb(vendor_id, product_id)
-    raise RuntimeError(f"Invalid printer URL: {printer_url}")
+    printer = None
+
+    try:
+        if all(char in "0123456789." for char in printer_url):
+            printer = Network(printer_url, port=9100)
+        elif (
+            re.fullmatch(r"0x[0-9A-Fa-f]{4},0x[0-9A-Fa-f]{4}", printer_url) is not None
+        ):
+            vendor_id, product_id = map(lambda x: int(x, 16), printer_url.split(","))
+            printer = Usb(vendor_id, product_id)
+        else:
+            raise RuntimeError(f"Invalid printer URL: {printer_url}")
+
+        yield printer
+
+    finally:
+        if isinstance(printer, Usb):
+            # Ensure the USB interface is released
+            usb.util.release_interface(printer.device, 0)
+            # Ensure the USB device is closed
+            printer.device.reset()
+            usb.util.dispose_resources(printer.device)
 
 
 def do_print(printer_url, receipt_data):
-    printer = get_printer(printer_url)
     total = 0
     discounted_total = 0
 
-    # Start bold text for the receipt header
-    printer.set(align="center", font="a", width=2, height=2, bold=True)
-    printer.text("Il Libraio\n")
-    printer.text("via XX Settembre, 5\n")
-    printer.text("12100 Cuneo\n\n\n")
-    printer.set(bold=False)
+    with get_printer(printer_url) as printer:
 
-    for item in receipt_data["items"]:
-        discount = item["discount"]
-        original_price = item["price"] * item["quantity"]
-        discounted_price = original_price * (100 - discount) / 100
+        # Start bold text for the receipt header
+        printer.set(align="center", font="a", width=2, height=2, bold=True)
+        printer.text("Il Libraio\n")
+        printer.text("via XX Settembre, 5, Cuneo\n")
+        printer.text("0171/602018\n")
+        printer.text("illibraio.cuneo@gmail.com\n\n\n")
+        printer.set(bold=False)
 
-        printer.set(align="left", bold=False)
-        printer.text(f"{item['title']}\n")
-        if item["quantity"] != 1:
-            printer.text(f"Quantità: {item['quantity']}\n")
+        for item in receipt_data["items"]:
+            discount = item["discount"]
+            original_price = item["price"] * item["quantity"]
+            discounted_price = original_price * (100 - discount) / 100
 
-        # Enable bold for price display
-        printer.set(align="right", bold=True)
-        printer.text(f"Prezzo: {item['price']:.2f} €\n")
-        printer.text(f"Sconto: {discount}%\n")
-        printer.text(f"Prezzo scontato: {discounted_price:.2f} €\n\n")
-        printer.set(align="left", bold=False)
+            printer.set(align="left", bold=False)
+            printer.text(f"{item['title']}\n")
+            if item["quantity"] != 1:
+                printer.text(f"Quantità: {item['quantity']}\n")
 
-        total += original_price
-        discounted_total += discounted_price
+            # Enable bold for price display
+            printer.set(align="right", bold=True)
+            printer.text(f"Prezzo: {item['price']:.2f} €\n")
+            printer.text(f"Sconto: {discount}%\n")
+            printer.text(f"Prezzo scontato: {discounted_price:.2f} €\n\n")
+            printer.set(align="left", bold=False)
 
-    total_discount = total - discounted_total
+            total += original_price
+            discounted_total += discounted_price
 
-    printer.set(bold=True)
-    if total_discount != 0:
-        printer.text(f"Subtotale:\t{total:.2f} €\n")
-        printer.text(f"Sconto:\t{total_discount:.2f} €\n")
-        printer.text(f"Totale scontato:\t{discounted_total:.2f} €\n")
-    else:
-        printer.text(f"Totale:\t{discounted_total:.2f} €\n")
-    printer.set(bold=False)
+        total_discount = total - discounted_total
 
-    printer.cut()
+        printer.set(bold=True)
+        if total_discount != 0:
+            printer.text(f"Subtotale:\t{total:.2f} €\n")
+            printer.text(f"Sconto:\t{total_discount:.2f} €\n")
+            printer.text(f"Totale scontato:\t{discounted_total:.2f} €\n")
+        else:
+            printer.text(f"Totale:\t{discounted_total:.2f} €\n")
+        printer.set(bold=False)
+
+        printer.cut()
 
 
 @click.command()
